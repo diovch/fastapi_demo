@@ -4,15 +4,16 @@ from hashlib import sha256
 import hmac
 import json
 from typing import Optional
+from os import getenv
 
-from fastapi import FastAPI, Form, Cookie, Body
+from fastapi import FastAPI, Cookie, Body
 from fastapi.responses import Response
 
 app = FastAPI()
 
 # key for signing cookies (should be in enviroment variable instead of code)
-SECRET_KEY = "66fd1b7aadbecad1df3ba6548491d24694c9aa9b41e1555edcba93cd82de8a8b"
-PASSWORD_SALT = "a17b4e865421e33a2072e32a29f98ad6abae3dc6a6e0075148d6d002c8b3c6de"
+SECRET_KEY = getenv('SECRET_KEY')
+PASSWORD_SALT = getenv('PASSWORD_SALT')
 
 def sign_data(data: str) -> str:
     """Return signed data"""
@@ -88,23 +89,3 @@ def process_login_page(data: dict = Body(...)) -> Response():
     username_signed = f"{base64.b64encode(username.encode()).decode()}.{sign_data(username)}"
     response.set_cookie(key="username", value=username_signed)
     return response
-
-# def process_login_page(username : str = Form(...), password : str = Form(...)) -> Response():
-#     user = users.get(username)
-#     if not user or not verify_password(username, password):
-#         return Response(
-#                 json.dumps({
-#                     "success": False,
-#                     "message": "I don`t know you"
-#                 }),
-#                 media_type="application/json")
-    
-#     response = Response(
-#                 json.dumps({
-#                     "success": True,
-#                     "message": f"Hello, {user['name']}! <br/> Your balance is {user['balance']}"
-#                 }),
-#                 media_type="application/json")
-#     username_signed = f"{base64.b64encode(username.encode()).decode()}.{sign_data(username)}"
-#     response.set_cookie(key="username", value=username_signed)
-#     return response
